@@ -11,14 +11,12 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
   
   <link rel="stylesheet" href="style.css">
-  
-  <!-- Markdown Parser murni (Puter.js sudah dibuang total) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <div class="app-wrapper">
     
-    <!-- Sidebar -->
+    <!-- Sidebar Kiri Dinamis -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <button class="new-chat-btn" onclick="startNewChat()">
@@ -30,19 +28,11 @@
         </button>
       </div>
 
-      <div class="chat-history-list">
-        <div class="history-label">Riwayat Kajian</div>
-        <div class="history-item active">
-          <i class="ri-chat-3-line"></i>
-          <span>Fiqih & Aqidah Aswaja</span>
-        </div>
-        <div class="history-item">
-          <i class="ri-book-open-line"></i>
-          <span>Kitab Kuning Salaf</span>
-        </div>
-        <div class="history-item">
-          <i class="ri-scales-3-line"></i>
-          <span>Ketetapan Bahtsul Masail</span>
+      <!-- Riwayat Obrolan Otomatis dari localStorage -->
+      <div class="chat-history-list" id="historyList">
+        <div class="history-label">Riwayat Obrolan</div>
+        <div id="historyItemsContainer" class="history-items-container">
+          <!-- Item chat dinamis dimuat oleh JavaScript di sini -->
         </div>
       </div>
 
@@ -75,40 +65,41 @@
       </header>
 
       <section class="messages-viewport" id="messagesViewport">
+        <!-- Welcome Screen dengan Prompt Lebih Menarik -->
         <div class="welcome-container" id="welcomeContainer">
           <div class="welcome-logo">
             <i class="ri-compass-3-line"></i>
           </div>
           <h2>Assalamu’alaikum Warahmatullah</h2>
-          <p>Asisten AI Resmi Nahdlatul Ulama untuk konsultasi hukum Fiqih Syafi'i, Aqidah Asy'ariyah/Maturidiyah, dan Bahtsul Masail.</p>
+          <p>Kajian fiqih kontemporer, bedah dalil kitab salaf, dan ketetapan Bahtsul Masail Nahdlatul Ulama.</p>
           
           <div class="quick-prompts">
-            <button class="prompt-card" onclick="useQuickPrompt('Bagaimana hukum dan tata cara qunut shalat Subuh menurut madzhab Syafi\'i?')">
-              <i class="ri-sun-line"></i>
+            <button class="prompt-card" onclick="useQuickPrompt('Bagaimana hukum sistem gacha atau loot box dalam game online menurut fiqih Syafi\'i?')">
+              <i class="ri-gamepad-line"></i>
               <div>
-                <strong>Qunut Subuh</strong>
-                <span>Hukum, dalil, dan sujud sahwi</span>
+                <strong>Gacha & Top Up Game</strong>
+                <span>Unsur gharar dan spekulasi dalam transaksi</span>
               </div>
             </button>
-            <button class="prompt-card" onclick="useQuickPrompt('Apa hukum bersentuhan kulit antara suami istri menurut qaul mu\'tamad madzhab Syafi\'i?')">
-              <i class="ri-hand-heart-line"></i>
+            <button class="prompt-card" onclick="useQuickPrompt('Apa status hukum promo bunga 0% Paylater dan cashback QRIS menurut Bahtsul Masail?')">
+              <i class="ri-qr-code-line"></i>
               <div>
-                <strong>Sentuhan Suami Istri</strong>
-                <span>Batasan batal wudhu dalam fiqih</span>
+                <strong>Paylater & Cashback QRIS</strong>
+                <span>Telaah riba qardh dan akad muamalah</span>
               </div>
             </button>
-            <button class="prompt-card" onclick="useQuickPrompt('Bagaimana urutan wirid dan dzikir setelah shalat fardhu menurut tradisi pesantren NU?')">
-              <i class="ri-apps-line"></i>
+            <button class="prompt-card" onclick="useQuickPrompt('Bagaimana dalil kitab salaf Syafi\'iyah mengenai tradisi tahlilan dan tabarruk ziarah kubur?')">
+              <i class="ri-ancient-gate-line"></i>
               <div>
-                <strong>Dzikir Ba\'da Shalat</strong>
-                <span>Urutan wirid & dalil kesunnahannya</span>
+                <strong>Tahlilan & Ngalap Berkah</strong>
+                <span>Landasan ibarat turats tradisi Aswaja</span>
               </div>
             </button>
-            <button class="prompt-card" onclick="useQuickPrompt('Jelaskan konsep sifat 20 bagi Allah dalam aqidah Asy\'ariyah.')">
-              <i class="ri-bookmark-3-line"></i>
+            <button class="prompt-card" onclick="useQuickPrompt('Bagaimana hukum dan tata cara shalat di pesawat atau kereta jika tidak bisa wudhu dan menghadap kiblat?')">
+              <i class="ri-flight-takeoff-line"></i>
               <div>
-                <strong>Sifat 20 Allah</strong>
-                <span>Landasan aqidah Asy'ariyah</span>
+                <strong>Shalat di Perjalanan</strong>
+                <span>Aturan shalat lihurmatil waqti dan qadla</span>
               </div>
             </button>
           </div>
@@ -121,7 +112,7 @@
         <div class="input-container">
           <textarea 
             id="userInput" 
-            placeholder="Tanyakan persoalan fiqih, dalil kitab, atau hukum syar'i..." 
+            placeholder="Tanyakan persoalan fiqih kontemporer, ibadah, atau hukum syar'i..." 
             rows="1"
             oninput="autoResizeTextarea(this)"></textarea>
           
