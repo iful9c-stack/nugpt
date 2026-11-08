@@ -5,7 +5,6 @@ const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 const sidebar = document.getElementById("sidebar");
 
-// Hanya menyimpan user & assistant messages, TIDAK ADA system prompt di sini
 let conversationHistory = [];
 
 userInput.addEventListener("input", () => {
@@ -43,35 +42,28 @@ async function sendMessage() {
     welcomeContainer.style.display = "none";
   }
 
-  // Tampilkan pesan user
   appendMessage(text, "user");
   userInput.value = "";
   userInput.style.height = "auto";
   sendBtn.disabled = true;
 
-  // Catat riwayat chat
   conversationHistory.push({ role: "user", content: text });
 
-  // Tampilkan loading bot
   const botBubble = appendMessage('<i class="ri-loader-4-line ri-spin"></i> Menelaah rujukan kitab salaf...', "assistant");
 
   try {
-    // Request ke backend serverless Node.js sendiri (/api/chat)
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages: conversationHistory })
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || "Gagal memproses jawaban");
+      throw new Error(data.error || "Gagal memproses jawaban dari server.");
     }
 
-    // Render jawaban
     botBubble.innerHTML = marked.parse(data.reply);
     conversationHistory.push({ role: "assistant", content: data.reply });
 
