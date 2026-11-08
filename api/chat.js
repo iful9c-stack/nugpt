@@ -1,10 +1,4 @@
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY // Disimpan di Vercel Environment Variables
-});
-
-// SYSTEM PROMPT AMAN DI SINI, TIDAK BISA DILIHAT OLEH INSPECT BROWSER
+// SYSTEM PROMPT RAHASIA (Tersimpan di serverless Vercel, aman dari inspect element)
 const SYSTEM_PROMPT = `
 Identitas & Karakter:
 1. Nama Anda adalah "Assistance AI Nahdlatul Ulama" (Nahdlatul Ulama GPT).
@@ -24,35 +18,66 @@ Aturan Penolakan & Larangan Mutlak:
 `;
 
 export default async function handler(req, res) {
-  // Hanya menerima metode POST
+  // Hanya menerima method POST
   if (req.method !== "POST") {
-    return res.status(455).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { messages } = req.body;
-
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: "Format pesan tidak valid" });
+    let body = req.body;
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        return res.status(400).json({ error: "Invalid JSON format" });
+      }
     }
 
-    // Gabungkan System Prompt di awal obrolan secara otomatis di server
+    const messages = body?.messages;
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: "Format pesan tidak valid atau kosong" });
+    }
+
+    // Suntikkan System Prompt rahasia di urutan teratas
     const fullConversation = [
       { role: "system", content: SYSTEM_PROMPT },
       ...messages
     ];
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: fullConversation,
-      temperature: 0.2
+    // Panggil 9router endpoint Antigravity Gemini
+    const response = await fetch("http://77.237.238.127:20128/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer sk-009776894202163a-1lh99d-40d458b2"
+      },
+      body: JSON.stringify({
+        // Model Gemini Antigravity di 9router Anda
+        // Jika nama model di dashboard 9router Anda berbeda, sesuaikan string ini
+        // (contoh: "gemini-1.5-flash", "gemini-2.0-flash", atau "gemini-1.5-pro")
+        model: "gemini-1.5-flash",
+        messages: fullConversation,
+        temperature: 0.2
+      })
     });
 
-    const reply = response.choices[0].message.content;
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("9router Antigravity Error:", errText);
+      return res.status(response.status).json({ 
+        error: `Error dari 9router (${response.status}): ${errText}` 
+      });
+    }
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "Tidak ada respon dari model.";
+
     return res.status(200).json({ reply });
 
   } catch (error) {
-    console.error("API Error:", error);
-    return res.status(500).json({ error: "Terjadi kesalahan internal pada server." });
+    console.error("Internal Server Error:", error);
+    return res.status(500).json({ 
+      error: error.message || "Gagal menghubungi backend 9router Antigravity Gemini." 
+    });
   }
 }
