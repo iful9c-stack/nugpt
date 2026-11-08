@@ -5,25 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nahdlatul Ulama GPT</title>
   
-  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Remix Icons (Ringan & Modern) -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
   
   <link rel="stylesheet" href="style.css">
   
-  <!-- Puter.js SDK -->
-  <script src="https://js.puter.com/v2/"></script>
-  <!-- Markdown Parser -->
+  <!-- Markdown Parser murni (Puter.js sudah dibuang total) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <div class="app-wrapper">
     
-    <!-- Sidebar Kiri ala ChatGPT -->
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <button class="new-chat-btn" onclick="startNewChat()">
@@ -62,9 +57,8 @@
       </div>
     </aside>
 
-    <!-- Area Konten Utama -->
+    <!-- Main Viewport -->
     <main class="chat-main">
-      <!-- Navbar Atas -->
       <header class="top-nav">
         <div class="nav-left">
           <button class="icon-btn" onclick="toggleSidebar()">
@@ -80,9 +74,7 @@
         </div>
       </header>
 
-      <!-- Container Percakapan -->
       <section class="messages-viewport" id="messagesViewport">
-        <!-- Tampilan Awal / Hero Welcome -->
         <div class="welcome-container" id="welcomeContainer">
           <div class="welcome-logo">
             <i class="ri-compass-3-line"></i>
@@ -90,7 +82,6 @@
           <h2>Assalamu’alaikum Warahmatullah</h2>
           <p>Asisten AI Resmi Nahdlatul Ulama untuk konsultasi hukum Fiqih Syafi'i, Aqidah Asy'ariyah/Maturidiyah, dan Bahtsul Masail.</p>
           
-          <!-- Tombol Pertanyaan Cepat -->
           <div class="quick-prompts">
             <button class="prompt-card" onclick="useQuickPrompt('Bagaimana hukum dan tata cara qunut shalat Subuh menurut madzhab Syafi\'i?')">
               <i class="ri-sun-line"></i>
@@ -123,11 +114,9 @@
           </div>
         </div>
 
-        <!-- Wadah Pesan Chat Dinamis -->
         <div class="chat-thread" id="chatThread"></div>
       </section>
 
-      <!-- Input Area Bawah -->
       <footer class="input-panel">
         <div class="input-container">
           <textarea 
@@ -141,7 +130,7 @@
           </button>
         </div>
         <div class="disclaimer-text">
-          Nahdlatul Ulama GPT menyajikan referensi berbasis kitab salaf Syafi'iyah & Bahtsul Masail. Untuk fatwa mu'tamad personal, konsultasikan ke alim ulama setempat.
+          Nahdlatul Ulama GPT menyajikan referensi berbasis kitab salaf Syafi'iyah & Bahtsul Masail.
         </div>
       </footer>
     </main>
