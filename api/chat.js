@@ -21,14 +21,6 @@ Aturan Penolakan & Larangan Mutlak:
 
 const FALLBACK_MESSAGE = "Afwan, sistem telaah rujukan Nahdlatul Ulama GPT sedang memperbarui sinkronisasi kitab. Mohon kesediaannya menunggu sejenak dan mengirim ulang pertanyaan Anda.";
 
-// Daftar model valid sesuai output endpoint /v1/models 9router Anda
-const PRIMARY_MODEL = "ag/gemini-3.8-flash";
-const BACKUP_MODELS = [
-  "ag/gemini-3.8-flash-medium",
-  "ag/gemini-3.7-flash-medium",
-  "my-combo"
-];
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ reply: "Akses tidak diizinkan." });
@@ -54,38 +46,54 @@ export default async function handler(req, res) {
       ...messages
     ];
 
-    const modelsToTry = [PRIMARY_MODEL, ...BACKUP_MODELS];
-    let reply = null;
+    const response = await fetch(ROUTER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${ROUTER_KEY}`
+      },
+      body: JSON.stringify({
+        model: "ag/gemini-3.8-flash",
+        messages: fullConversation,
+        stream: false
+      })
+    });
 
-    for (const modelName of modelsToTry) {
-      try {
-        const response = await fetch(ROUTER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${ROUTER_KEY}`
-          },
-          body: JSON.stringify({
-            model: modelName,
-            messages: fullConversation,
-            temperature: 0.2
-          })
-        });
+    if (!response.ok) {
+      console.error("[9router Error HTTP]:", response.status);
+      return res.status(200).json({ reply: FALLBACK_MESSAGE });
+    }
 
-        if (response.ok) {
-          const data = await response.json();
-          reply = data.choices?.[0]?.message?.content;
-          if (reply) break;
-        } else {
-          const errDetail = await response.text();
-          console.error(`[9router Log] Model ${modelName} gagal:`, errDetail);
+    const rawText = await response.text();
+    let finalReply = "";
+
+    // 1. Coba parse jika respons berbentuk JSON standar biasa
+    try {
+      const parsedJson = JSON.parse(rawText);
+      finalReply = parsedJson.choices?.[0]?.message?.content || "";
+    } catch {
+      // 2. Jika bukan JSON biasa, parse format Server-Sent Events (data: {...})
+      const lines = rawText.split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("data:") && !trimmed.includes("[DONE]")) {
+          try {
+            const chunkJson = JSON.parse(trimmed.replace(/^data:\s*/, ""));
+            const contentPiece = chunkJson.choices?.[0]?.delta?.content;
+            if (contentPiece) {
+              finalReply += contentPiece;
+            }
+          } catch {
+            // Lewati baris yang bukan chunk JSON valid
+          }
         }
-      } catch (reqErr) {
-        console.error(`[9router Log] Request error on ${modelName}:`, reqErr);
       }
     }
 
-    return res.status(200).json({ reply: reply || FALLBACK_MESSAGE });
+    // Jika finalReply masih kosong, gunakan fallback santun
+    return res.status(200).json({
+      reply: finalReply.trim() || FALLBACK_MESSAGE
+    });
 
   } catch (err) {
     console.error("[Internal Server Error]:", err);
