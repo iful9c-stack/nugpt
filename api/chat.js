@@ -1,3 +1,6 @@
+const ROUTER_URL = "http://77.237.238.127:20128/v1/chat/completions";
+const ROUTER_KEY = "sk-009776894202163a-1lh99d-40d458b2";
+
 const SYSTEM_PROMPT = `
 Identitas & Karakter:
 1. Nama Anda adalah "Assistance AI Nahdlatul Ulama" (Nahdlatul Ulama GPT).
@@ -16,11 +19,19 @@ Aturan Penolakan & Larangan Mutlak:
 4. Gunakan gaya bahasa yang santun, runtut, terstruktur rapi, dan tawadhu'.
 `;
 
-const FALLBACK_MESSAGE = "Afwan, sistem rujukan Nahdlatul Ulama GPT sedang memperbarui koneksi database telaah kitab. Mohon kesediaannya menunggu sejenak dan mengirim ulang pertanyaan Anda.";
+const FALLBACK_MESSAGE = "Afwan, sistem telaah rujukan Nahdlatul Ulama GPT sedang memperbarui sinkronisasi kitab. Mohon kesediaannya menunggu sejenak dan mengirim ulang pertanyaan Anda.";
+
+// Daftar alias model yang akan dicoba secara berurutan ke 9router
+const CANDIDATE_MODELS = [
+  "3.8 flash",
+  "3.8-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash"
+];
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Akses tidak diizinkan." });
+    return res.status(405).json({ reply: "Akses tidak diizinkan." });
   }
 
   try {
@@ -28,7 +39,7 @@ export default async function handler(req, res) {
     if (typeof body === "string") {
       try {
         body = JSON.parse(body);
-      } catch (e) {
+      } catch {
         return res.status(200).json({ reply: FALLBACK_MESSAGE });
       }
     }
@@ -43,36 +54,41 @@ export default async function handler(req, res) {
       ...messages
     ];
 
-    // Panggilan ke 9router dengan model 3.8 flash
-    const response = await fetch("http://77.237.238.127:20128/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer sk-009776894202163a-1lh99d-40d458b2"
-      },
-      body: JSON.stringify({
-        // Sesuaikan persis penulisan nama model di dashboard 9router Anda:
-        // Gunakan "3.8 flash" atau "3.8-flash"
-        model: "3.8 flash",
-        messages: fullConversation,
-        temperature: 0.2
-      })
-    });
+    let reply = null;
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("[Internal Log Only] 9router gagal:", errText);
-      // Tetap kembalikan pesan santun ke pengguna, jangan bocorkan error teknis
-      return res.status(200).json({ reply: FALLBACK_MESSAGE });
+    // Coba model 3.8 flash terlebih dahulu
+    for (const modelName of CANDIDATE_MODELS) {
+      try {
+        const response = await fetch(ROUTER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${ROUTER_KEY}`
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: fullConversation,
+            temperature: 0.2
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          reply = data.choices?.[0]?.message?.content;
+          if (reply) break;
+        } else {
+          const errDetail = await response.text();
+          console.error(`[9router Log] Model ${modelName} gagal:`, errDetail);
+        }
+      } catch (reqErr) {
+        console.error(`[9router Log] Koneksi ke ${modelName} error:`, reqErr);
+      }
     }
 
-    const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || FALLBACK_MESSAGE;
-
-    return res.status(200).json({ reply });
+    return res.status(200).json({ reply: reply || FALLBACK_MESSAGE });
 
   } catch (err) {
-    console.error("[Internal Log Only] Error:", err);
+    console.error("[Internal Server Error]:", err);
     return res.status(200).json({ reply: FALLBACK_MESSAGE });
   }
 }
