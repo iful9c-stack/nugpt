@@ -1,11 +1,10 @@
 :root {
-  --primary: #007a3d;          /* Hijau NU Elegan */
+  --primary: #007a3d;
   --primary-hover: #006030;
   --primary-light: #e6f4ed;
-  --accent-gold: #c69214;
   --bg-main: #ffffff;
   --bg-subtle: #f9fafb;
-  --sidebar-bg: #111827;      /* Dark Mode Sidebar Kontras */
+  --sidebar-bg: #111827;
   --sidebar-hover: #1f2937;
   --text-main: #111827;
   --text-muted: #6b7280;
@@ -34,7 +33,6 @@ body {
   width: 100vw;
 }
 
-/* --- SIDEBAR STYLING --- */
 .sidebar {
   width: 260px;
   background-color: var(--sidebar-bg);
@@ -146,7 +144,6 @@ body {
   color: #9ca3af;
 }
 
-/* --- MAIN VIEWPORT --- */
 .chat-main {
   flex: 1;
   display: flex;
@@ -184,13 +181,11 @@ body {
   font-size: 0.8rem;
   padding: 4px 7px;
   border-radius: 6px;
-  letter-spacing: 0.05em;
 }
 
 .title-text {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--text-main);
 }
 
 .title-text strong {
@@ -227,7 +222,6 @@ body {
   color: var(--text-main);
 }
 
-/* --- MESSAGES AREA --- */
 .messages-viewport {
   flex: 1;
   overflow-y: auto;
@@ -296,7 +290,6 @@ body {
 .prompt-card strong {
   display: block;
   font-size: 0.9rem;
-  color: var(--text-main);
   margin-bottom: 4px;
 }
 
@@ -311,7 +304,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* --- THREAD MESSAGES --- */
 .chat-thread {
   max-width: 820px;
   width: 100%;
@@ -342,9 +334,6 @@ body {
   font-size: 0.85rem;
   font-weight: bold;
   flex-shrink: 0;
-}
-
-.msg-row.assistant .msg-avatar {
   background-color: var(--primary);
   color: #fff;
 }
@@ -367,31 +356,6 @@ body {
   padding-top: 4px;
 }
 
-/* Markdown typography styling */
-.msg-body h1, .msg-body h2, .msg-body h3 {
-  margin-top: 14px;
-  margin-bottom: 8px;
-  color: #111827;
-}
-
-.msg-body p {
-  margin-bottom: 10px;
-}
-
-.msg-body ul, .msg-body ol {
-  margin-left: 20px;
-  margin-bottom: 12px;
-}
-
-.msg-body blockquote {
-  border-left: 3px solid var(--primary);
-  padding-left: 12px;
-  color: #4b5563;
-  margin: 10px 0;
-  font-style: italic;
-}
-
-/* --- INPUT PANEL --- */
 .input-panel {
   padding: 16px 24px 20px;
   background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 25%);
@@ -408,7 +372,6 @@ body {
   border-radius: 20px;
   box-shadow: var(--shadow-sm);
   padding: 8px 12px 8px 16px;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input-container:focus-within {
@@ -462,7 +425,6 @@ textarea {
   margin-top: 8px;
 }
 
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .sidebar {
     position: absolute;
