@@ -1,4 +1,3 @@
-// SYSTEM PROMPT RAHASIA (Tersimpan di serverless Vercel, aman dari inspect element)
 const SYSTEM_PROMPT = `
 Identitas & Karakter:
 1. Nama Anda adalah "Assistance AI Nahdlatul Ulama" (Nahdlatul Ulama GPT).
@@ -17,10 +16,11 @@ Aturan Penolakan & Larangan Mutlak:
 4. Gunakan gaya bahasa yang santun, runtut, terstruktur rapi, dan tawadhu'.
 `;
 
+const FALLBACK_MESSAGE = "Afwan, sistem rujukan Nahdlatul Ulama GPT sedang memperbarui koneksi database telaah kitab. Mohon kesediaannya menunggu sejenak dan mengirim ulang pertanyaan Anda.";
+
 export default async function handler(req, res) {
-  // Hanya menerima method POST
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Akses tidak diizinkan." });
   }
 
   try {
@@ -29,22 +29,21 @@ export default async function handler(req, res) {
       try {
         body = JSON.parse(body);
       } catch (e) {
-        return res.status(400).json({ error: "Invalid JSON format" });
+        return res.status(200).json({ reply: FALLBACK_MESSAGE });
       }
     }
 
     const messages = body?.messages;
     if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: "Format pesan tidak valid atau kosong" });
+      return res.status(200).json({ reply: FALLBACK_MESSAGE });
     }
 
-    // Suntikkan System Prompt rahasia di urutan teratas
     const fullConversation = [
       { role: "system", content: SYSTEM_PROMPT },
       ...messages
     ];
 
-    // Panggil 9router endpoint Antigravity Gemini
+    // Panggilan ke 9router dengan model 3.8 flash
     const response = await fetch("http://77.237.238.127:20128/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -52,10 +51,9 @@ export default async function handler(req, res) {
         "Authorization": "Bearer sk-009776894202163a-1lh99d-40d458b2"
       },
       body: JSON.stringify({
-        // Model Gemini Antigravity di 9router Anda
-        // Jika nama model di dashboard 9router Anda berbeda, sesuaikan string ini
-        // (contoh: "gemini-1.5-flash", "gemini-2.0-flash", atau "gemini-1.5-pro")
-        model: "gemini-1.5-flash",
+        // Sesuaikan persis penulisan nama model di dashboard 9router Anda:
+        // Gunakan "3.8 flash" atau "3.8-flash"
+        model: "3.8 flash",
         messages: fullConversation,
         temperature: 0.2
       })
@@ -63,21 +61,18 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("9router Antigravity Error:", errText);
-      return res.status(response.status).json({ 
-        error: `Error dari 9router (${response.status}): ${errText}` 
-      });
+      console.error("[Internal Log Only] 9router gagal:", errText);
+      // Tetap kembalikan pesan santun ke pengguna, jangan bocorkan error teknis
+      return res.status(200).json({ reply: FALLBACK_MESSAGE });
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "Tidak ada respon dari model.";
+    const reply = data.choices?.[0]?.message?.content || FALLBACK_MESSAGE;
 
     return res.status(200).json({ reply });
 
-  } catch (error) {
-    console.error("Internal Server Error:", error);
-    return res.status(500).json({ 
-      error: error.message || "Gagal menghubungi backend 9router Antigravity Gemini." 
-    });
+  } catch (err) {
+    console.error("[Internal Log Only] Error:", err);
+    return res.status(200).json({ reply: FALLBACK_MESSAGE });
   }
 }
