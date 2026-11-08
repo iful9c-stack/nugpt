@@ -34,7 +34,6 @@ function useQuickPrompt(text) {
   sendMessage();
 }
 
-
 async function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
@@ -60,15 +59,13 @@ async function sendMessage() {
     });
 
     const data = await res.json();
-    const responseText = data.reply || "Afwan, silakan ulangi kembali pertanyaan Anda beberapa saat lagi.";
+    const replyText = data.reply || "Afwan, silakan kirim ulang pertanyaan Anda.";
 
-    botBubble.innerHTML = marked.parse(responseText);
-    conversationHistory.push({ role: "assistant", content: responseText });
+    botBubble.innerHTML = marked.parse(replyText);
+    conversationHistory.push({ role: "assistant", content: replyText });
 
-  } catch (error) {
-    // Jangan pernah tampilkan detail error teknis ke user
-    const errorFallback = "Afwan, koneksi ke sistem Nahdlatul Ulama GPT terputus sejenak. Silakan muat ulang atau coba kembali.";
-    botBubble.innerHTML = marked.parse(errorFallback);
+  } catch {
+    botBubble.innerHTML = marked.parse("Afwan, jaringan telaah kitab sedang disinkronkan. Silakan coba kembali.");
   } finally {
     scrollToBottom();
   }
