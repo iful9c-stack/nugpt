@@ -21,12 +21,12 @@ Aturan Penolakan & Larangan Mutlak:
 
 const FALLBACK_MESSAGE = "Afwan, sistem telaah rujukan Nahdlatul Ulama GPT sedang memperbarui sinkronisasi kitab. Mohon kesediaannya menunggu sejenak dan mengirim ulang pertanyaan Anda.";
 
-// Daftar alias model yang akan dicoba secara berurutan ke 9router
-const CANDIDATE_MODELS = [
-  "3.8 flash",
-  "3.8-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash"
+// Daftar model valid sesuai output endpoint /v1/models 9router Anda
+const PRIMARY_MODEL = "ag/gemini-3.8-flash";
+const BACKUP_MODELS = [
+  "ag/gemini-3.8-flash-medium",
+  "ag/gemini-3.7-flash-medium",
+  "my-combo"
 ];
 
 export default async function handler(req, res) {
@@ -54,10 +54,10 @@ export default async function handler(req, res) {
       ...messages
     ];
 
+    const modelsToTry = [PRIMARY_MODEL, ...BACKUP_MODELS];
     let reply = null;
 
-    // Coba model 3.8 flash terlebih dahulu
-    for (const modelName of CANDIDATE_MODELS) {
+    for (const modelName of modelsToTry) {
       try {
         const response = await fetch(ROUTER_URL, {
           method: "POST",
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
           console.error(`[9router Log] Model ${modelName} gagal:`, errDetail);
         }
       } catch (reqErr) {
-        console.error(`[9router Log] Koneksi ke ${modelName} error:`, reqErr);
+        console.error(`[9router Log] Request error on ${modelName}:`, reqErr);
       }
     }
 
