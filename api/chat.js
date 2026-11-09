@@ -1,5 +1,5 @@
-const ROUTER_URL = "http://77.237.238.127:20128/v1/chat/completions";
-const ROUTER_KEY = "sk-009776894202163a-1lh99d-40d458b2";
+//const ROUTER_URL = "http://77.237.238.127:20128/v1/chat/completions";
+//const ROUTER_KEY = "sk-009776894202163a-1lh99d-40d458b2";
 
 const SYSTEM_PROMPT = `
 [ROLE & MANHAJ IDENTITY]
